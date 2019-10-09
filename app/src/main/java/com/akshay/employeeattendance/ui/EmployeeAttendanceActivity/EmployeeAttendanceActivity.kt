@@ -21,6 +21,7 @@ import org.kodein.di.KodeinAware
 import org.kodein.di.android.closestKodein
 import org.kodein.di.generic.factory
 import java.lang.StringBuilder
+import java.math.RoundingMode
 import java.text.SimpleDateFormat
 import java.time.YearMonth
 import java.util.*
@@ -31,7 +32,7 @@ class EmployeeAttendanceActivity : ScopeActivity(), KodeinAware {
     private val employeeAttendanceViewModelFactory : ((EmployeeRequest) -> EmployeeAttendanceViewModelFactory) by factory()
     private lateinit var viewModel: EmployeeAttendanceViewModel
 
-    val attendanceList : MutableMap<Int, Long> = mutableMapOf<Int,Long>()
+    val attendanceList : MutableMap<Int, Double> = mutableMapOf<Int,Double>()
     var fromDate : String = ""
     var month : String = ""
     var toDate : String = ""
@@ -60,6 +61,11 @@ class EmployeeAttendanceActivity : ScopeActivity(), KodeinAware {
         bindUI()
     }
 
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
+    }
+
     private fun bindUI() = launch {
         val employees = viewModel.employees.await()
         employees.observe(this@EmployeeAttendanceActivity, Observer {
@@ -77,19 +83,20 @@ class EmployeeAttendanceActivity : ScopeActivity(), KodeinAware {
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
                 val entryAt = dateFormat.parse(data.entry_at)
                 val exitAt = dateFormat.parse(data.exit_at)
-                val diffInMin = (exitAt.time - entryAt.time)/(60*1000)
+
+                val diffInMin = (exitAt.time - entryAt.time)/(60*60*1000).toDouble()
+                val diffInHours = diffInMin.toBigDecimal().setScale(1, RoundingMode.HALF_DOWN).toDouble()
 
                 val dayFormat = SimpleDateFormat("dd")
-
                 val day = dayFormat.format(entryAt.time).toInt()
 
                 if(attendanceList.containsKey(day))
                 {
-                    attendanceList[day] = attendanceList[day]!!.plus(diffInMin)
+                    attendanceList[day] = attendanceList[day]!!.plus(diffInHours)
                 }
                 else
                 {
-                    attendanceList.put(day, diffInMin)
+                    attendanceList.put(day, diffInHours)
                 }
 
             }
@@ -143,7 +150,8 @@ class EmployeeAttendanceActivity : ScopeActivity(), KodeinAware {
             coloum1.text=mKey.toString()
 
             val coloum2 = (row.findViewById<View>(R.id.attrib_value) as TextView)
-            coloum2.text= (mValue/60).toString()
+            val hours : Double = mValue/60
+            coloum2.text= mValue.toString()//hours.toBigDecimal().setScale(1, RoundingMode.UP).toDouble().toString()
 
             if(i%2 == 0)
             {
@@ -161,7 +169,7 @@ class EmployeeAttendanceActivity : ScopeActivity(), KodeinAware {
     fun createFinalReport()
     {
         var daysInMonth : Int
-        var totalLoggedMinutes : Long = 0
+        var totalLoggedMinutes : Double = 0.0
 
         val dateFormat = SimpleDateFormat("yyyy-MM-dd")
         val yearFormat = SimpleDateFormat("yyyy")
@@ -183,7 +191,7 @@ class EmployeeAttendanceActivity : ScopeActivity(), KodeinAware {
         {
             totalLoggedMinutes += v
         }
-        hoursLoggedText.text = (totalLoggedMinutes/60).toString()
+        hoursLoggedText.text = totalLoggedMinutes.toString()
         daysPresentText.text = attendanceList.size.toString()
         daysAbsent.text = (daysInMonth - attendanceList.size).toString()
     }
