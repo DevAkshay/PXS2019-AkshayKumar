@@ -1,12 +1,12 @@
 # EmployeeAttendance
 
-Android App to view the Employee Attendance Report
-You can download the APK from  [here](https://github.com/DevAkshay/PXS2019-AkshayKumar/blob/master/app-debug.apk) to install foobar.
+Android App to view the Employee Attendance Report<br />
+You can download the APK from  [here](https://github.com/DevAkshay/PXS2019-AkshayKumar/blob/master/app-debug.apk) 
 
 ## Prerequisites
 
-Andriod Studio v3.4
-Gradle v5.1.1
+- Andriod Studio v3.4
+- Gradle v5.1.1
 
 ## Checkout
 
