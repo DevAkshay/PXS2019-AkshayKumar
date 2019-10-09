@@ -20,4 +20,8 @@ git clone git@github.com:DevAkshay/PXS2019-AkshayKumar.git
 
 You can direcly run the app by clicking on the Run in android studio either in Emulator or usb debugging enabled android device
 
+## Testing
+
+Select the Employee, Month and Year from the drop down and click on View Attendance Report button, you will the get the report of that employee for that month
+
 
